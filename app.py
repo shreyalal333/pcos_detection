@@ -1,0 +1,127 @@
+import streamlit as st
+import pandas as pd
+import numpy as np
+import pickle
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import confusion_matrix, classification_report, roc_curve, auc
+
+model = pickle.load(open("model.pkl", "rb"))
+scaler = pickle.load(open("scaler.pkl", "rb"))
+
+st.set_page_config(page_title="PCOS Early Diagnosis", layout="wide")
+
+menu = st.sidebar.radio(
+    "Navigation",
+    ["Introduction", "Dataset & Model Evaluation", "Individual Risk Assessment", "Prevention & Doctor Finder"]
+)
+
+# ---------------- PAGE 1 ----------------
+if menu == "Introduction":
+    st.title("🩺 Early Diagnosis of Polycystic Ovary Syndrome (PCOS)")
+    
+    st.write("""
+    **Polycystic Ovary Syndrome (PCOS)** is a common hormonal disorder affecting women of reproductive age.
+    Early detection can significantly reduce long-term complications such as infertility,
+    diabetes, cardiovascular disease, and metabolic disorders.
+    
+    ### 🎯 Project Objective
+    - Develop a predictive machine learning model for early PCOS diagnosis
+    - Assist clinicians and individuals with data-driven risk assessment
+    - Provide preventive guidance and medical support access
+    """)
+
+# ---------------- PAGE 2 ----------------
+elif menu == "Dataset & Model Evaluation":
+    st.title("📊 Dataset Upload & Model Performance")
+
+    file = st.file_uploader("Upload PCOS Dataset", type=["csv", "xlsx"])
+
+    if file:
+        if file.name.endswith("xlsx"):
+            df = pd.read_excel(file)
+        else:
+            df = pd.read_csv(file)
+
+        df = df.drop(columns=['Sl. No', 'Patient File No.'])
+        df.fillna(df.mean(numeric_only=True), inplace=True)
+
+        X = df.drop('PCOS (Y/N)', axis=1)
+        y = df['PCOS (Y/N)']
+
+        X_scaled = scaler.transform(X)
+        y_pred = model.predict(X_scaled)
+        y_prob = model.predict_proba(X_scaled)[:,1]
+
+        st.subheader("Confusion Matrix")
+        cm = confusion_matrix(y, y_pred)
+        fig, ax = plt.subplots()
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax)
+        st.pyplot(fig)
+
+        st.subheader("Classification Report")
+        st.text(classification_report(y, y_pred))
+
+        st.subheader("ROC Curve")
+        fpr, tpr, _ = roc_curve(y, y_prob)
+        roc_auc = auc(fpr, tpr)
+        fig, ax = plt.subplots()
+        ax.plot(fpr, tpr, label=f"AUC = {roc_auc:.2f}")
+        ax.plot([0,1],[0,1],'--')
+        ax.legend()
+        st.pyplot(fig)
+
+# ---------------- PAGE 3 ----------------
+elif menu == "Individual Risk Assessment":
+    st.title("🧍 Individual PCOS Risk Prediction")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        age = st.number_input("Age", 15, 50)
+        height = st.number_input("Height (cm)")
+        weight = st.number_input("Weight (kg)")
+        systolic = st.number_input("BP Systolic")
+        diastolic = st.number_input("BP Diastolic")
+
+    with col2:
+        lh = st.number_input("LH")
+        fsh = st.number_input("FSH")
+        amh = st.number_input("AMH")
+        tsh = st.number_input("TSH")
+        prl = st.number_input("Prolactin")
+
+    bmi = weight / ((height/100)**2) if height > 0 else 0
+    st.write(f"**Calculated BMI:** {bmi:.2f}")
+
+    if st.button("Predict PCOS Risk"):
+        input_data = np.array([[age, weight, height, bmi, 0, systolic, diastolic,
+                                 0, lh, fsh, lh/fsh if fsh != 0 else 0,
+                                 amh, tsh, prl] + [0]* (model.n_features_in_ - 14)])
+        
+        input_scaled = scaler.transform(input_data)
+        prediction = model.predict(input_scaled)[0]
+        probability = model.predict_proba(input_scaled)[0][1]
+
+        st.subheader("Result")
+        if prediction == 1:
+            st.error(f"⚠️ High Risk of PCOS ({probability*100:.2f}%)")
+        else:
+            st.success(f"✅ Low Risk of PCOS ({probability*100:.2f}%)")
+
+# ---------------- PAGE 4 ----------------
+else:
+    st.title("🌿 Prevention & Gynecologist Finder")
+
+    st.subheader("Preventive Measures")
+    st.write("""
+    - Maintain healthy body weight
+    - Regular physical activity
+    - Balanced diet (low sugar, high fiber)
+    - Stress management
+    - Regular hormonal screening
+    """)
+
+    st.subheader("Find Nearby Gynecologist")
+    st.write("Click below to locate nearby gynecologists:")
+    st.markdown("[🔍 Find Gynecologist Near Me](https://www.google.com/maps/search/gynecologist+near+me)")
