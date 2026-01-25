@@ -18,18 +18,36 @@ menu = st.sidebar.radio(
 
 # ---------------- PAGE 1 ----------------
 if menu == "Introduction":
-    st.title("🩺 Early Diagnosis of Polycystic Ovary Syndrome (PCOS)")
-    
+        st.title("🩺 Polycystic Ovary Syndrome (PCOS)")
     st.write("""
-    **Polycystic Ovary Syndrome (PCOS)** is a common hormonal disorder affecting women of reproductive age.
-    Early detection can significantly reduce long-term complications such as infertility,
-    diabetes, cardiovascular disease, and metabolic disorders.
-    
-    ### 🎯 Project Objective
-    - Develop a predictive machine learning model for early PCOS diagnosis
-    - Assist clinicians and individuals with data-driven risk assessment
-    - Provide preventive guidance and medical support access
+    PCOS is a common hormonal disorder affecting women of reproductive age.
+    It is associated with metabolic, reproductive, and psychological complications.
     """)
+
+    st.subheader("Who does it affect?")
+    st.markdown("""
+    - Women aged **12–50 years**
+    - ~6–13% prevalence globally
+    - Higher prevalence in South Asian populations
+    """)
+
+    st.subheader("Common Symptoms")
+    st.markdown("""
+    - Irregular or absent periods  
+    - Acne and oily skin  
+    - Excess hair growth (hirsutism)  
+    - Weight gain  
+    - Infertility  
+    - Insulin resistance / diabetes  
+    """)
+
+    st.subheader("Why Early Detection Matters")
+    st.write("""
+    Early screening helps prevent long-term complications such as:
+    diabetes, cardiovascular disease, infertility, and mental health issues.
+    """)
+
+    st.info("⚠️ This tool is for educational screening only, not diagnosis.")
 
 # ---------------- PAGE 2 ----------------
 elif menu == "Dataset & Model Evaluation":
