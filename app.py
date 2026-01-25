@@ -45,10 +45,16 @@ elif menu == "Dataset & Model Evaluation":
 
         df = df.drop(columns=['Sl. No', 'Patient File No.'])
         df.fillna(df.mean(numeric_only=True), inplace=True)
+        FEATURE_COLUMNS = scaler.feature_names_in_
 
         X = df.drop('PCOS (Y/N)', axis=1)
+        X = X[FEATURE_COLUMNS]   # enforce correct order
+
         y = df['PCOS (Y/N)']
 
+        for col in X.columns:
+            X[col] = pd.to_numeric(X[col], errors='coerce')
+        X.fillna(X.mean(numeric_only=True), inplace=True)
         X_scaled = scaler.transform(X)
         y_pred = model.predict(X_scaled)
         y_prob = model.predict_proba(X_scaled)[:,1]
