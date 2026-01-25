@@ -18,18 +18,16 @@ menu = st.sidebar.radio(
 
 # ---------------- PAGE 1 ----------------
 if menu == "Introduction":
-        st.title("🩺 Polycystic Ovary Syndrome (PCOS)")
+    st.title("🩺 Polycystic Ovary Syndrome (PCOS)")
     st.write("""
     PCOS is a common hormonal disorder affecting women of reproductive age.
-    It is associated with metabolic, reproductive, and psychological complications.
-    """)
+    It is associated with metabolic, reproductive, and psychological complications. """)
 
     st.subheader("Who does it affect?")
     st.markdown("""
     - Women aged **12–50 years**
     - ~6–13% prevalence globally
-    - Higher prevalence in South Asian populations
-    """)
+    - Higher prevalence in South Asian populations""")
 
     st.subheader("Common Symptoms")
     st.markdown("""
@@ -38,8 +36,7 @@ if menu == "Introduction":
     - Excess hair growth (hirsutism)  
     - Weight gain  
     - Infertility  
-    - Insulin resistance / diabetes  
-    """)
+    - Insulin resistance / diabetes  """)
 
     st.subheader("Why Early Detection Matters")
     st.write("""
