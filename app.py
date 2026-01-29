@@ -73,6 +73,18 @@ elif menu == "Dataset & Model Evaluation":
         X_scaled = scaler.transform(X)
         y_pred = model.predict(X_scaled)
         y_prob = model.predict_proba(X_scaled)[:,1]
+        # Predictions
+        y_pred = model.predict(X_scaled)
+        y_prob = model.predict_proba(X_scaled)[:, 1]
+        
+        # Ensure correct types
+        y = y.astype(int)
+        y_pred = y_pred.astype(int)
+        
+        # Confusion Matrix
+        cm = confusion_matrix(y, y_pred)
+
+        
 
         st.subheader("Confusion Matrix")
         cm = confusion_matrix(y, y_pred)
