@@ -5,6 +5,8 @@ import pickle
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, classification_report, roc_curve, auc
+feature_cols = scaler.feature_names_in_
+
 
 model = pickle.load(open("model.pkl", "rb"))
 scaler = pickle.load(open("scaler.pkl", "rb"))
@@ -105,42 +107,43 @@ elif menu == "Dataset & Model Evaluation":
         st.pyplot(fig)
 
 # ---------------- PAGE 3 ----------------
-elif menu == "Individual Risk Assessment":
-    st.title("🧍 Individual PCOS Risk Prediction")
+if st.button("Predict PCOS Risk"):
 
-    col1, col2 = st.columns(2)
+    row = dict.fromkeys(feature_cols, 0)
 
-    with col1:
-        age = st.number_input("Age", 15, 50)
-        height = st.number_input("Height (cm)")
-        weight = st.number_input("Weight (kg)")
-        systolic = st.number_input("BP Systolic")
-        diastolic = st.number_input("BP Diastolic")
+    # map known features by exact training names
+    def set_if_exists(name, value):
+        if name in row:
+            row[name] = value
 
-    with col2:
-        lh = st.number_input("LH")
-        fsh = st.number_input("FSH")
-        amh = st.number_input("AMH")
-        tsh = st.number_input("TSH")
-        prl = st.number_input("Prolactin")
+    set_if_exists("Age (yrs)", age)
+    set_if_exists("Height(Cm)", height)
+    set_if_exists("Weight (Kg)", weight)
+    set_if_exists("BMI", bmi)
+    set_if_exists("BP _Systolic (mmHg)", systolic)
+    set_if_exists("BP _Diastolic (mmHg)", diastolic)
+    set_if_exists("LH", lh)
+    set_if_exists("FSH", fsh)
+    set_if_exists("FSH/LH", fsh/lh if lh != 0 else 0)
+    set_if_exists("AMH", amh)
+    set_if_exists("TSH", tsh)
+    set_if_exists("PRL", prl)
 
-    bmi = weight / ((height/100)**2) if height > 0 else 0
-    st.write(f"**Calculated BMI:** {bmi:.2f}")
+    input_df = pd.DataFrame([row])
+    input_scaled = scaler.transform(input_df)
 
-    if st.button("Predict PCOS Risk"):
-        input_data = np.array([[age, weight, height, bmi, 0, systolic, diastolic,
-                                 0, lh, fsh, lh/fsh if fsh != 0 else 0,
-                                 amh, tsh, prl] + [0]* (model.n_features_in_ - 14)])
-        
-        input_scaled = scaler.transform(input_data)
-        prediction = model.predict(input_scaled)[0]
-        probability = model.predict_proba(input_scaled)[0][1]
+    prediction = model.predict(input_scaled)[0]
+    probability = model.predict_proba(input_scaled)[0][1]
 
-        st.subheader("Result")
-        if prediction == 1:
-            st.error(f"⚠️ High Risk of PCOS ({probability*100:.2f}%)")
-        else:
-            st.success(f"✅ Low Risk of PCOS ({probability*100:.2f}%)")
+    st.subheader("Result")
+
+    if probability > 0.65:
+        st.error(f"⚠️ High Risk of PCOS ({probability*100:.2f}%)")
+    elif probability > 0.35:
+        st.warning(f"🟠 Moderate Risk ({probability*100:.2f}%)")
+    else:
+        st.success(f"✅ Low Risk ({probability*100:.2f}%)")
+
 
 # ---------------- PAGE 4 ----------------
 else:
