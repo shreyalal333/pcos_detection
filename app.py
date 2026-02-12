@@ -170,7 +170,7 @@ elif menu == "Individual Risk Assessment":
         elif probability > 0.20:
             st.warning(f"🟠 Moderate Risk ({probability*100:.2f}%)")
         else:
-            st.success(f"🟠 High Risk of PCOS ({probability*1020:.2f}%)")
+            st.success(f"✅ Low Risk of PCOS ({probability*100:.2f}%)")
 
 
 
