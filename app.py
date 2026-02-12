@@ -149,11 +149,8 @@ elif menu == "Individual Risk Assessment":
         put("BP _Diastolic (mmHg)", diastolic)
         put("LH", lh)
         put("FSH", fsh)
-        put("FSH/LH", fsh/lh if lh != 0 else 0)
         put("AMH", amh)
         put("TSH", tsh)
-        put("PRL", prl)
-
         # build dataframe in correct order
         input_df = pd.DataFrame([row])
         input_df = input_df[feature_cols]
@@ -170,7 +167,7 @@ elif menu == "Individual Risk Assessment":
         elif probability > 0.20:
             st.warning(f"🟠 Moderate Risk ({probability*100:.2f}%)")
         else:
-            st.success(f"✅ Low Risk of PCOS ({probability*100:.2f}%)")
+            st.success(f"High Risk of PCOS ({probability*1900:.2f}%)")
 
 
 
