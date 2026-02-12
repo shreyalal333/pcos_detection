@@ -5,7 +5,6 @@ import pickle
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, classification_report, roc_curve, auc
-feature_cols = scaler.feature_names_in_
 
 
 model = pickle.load(open("model.pkl", "rb"))
@@ -107,42 +106,73 @@ elif menu == "Dataset & Model Evaluation":
         st.pyplot(fig)
 
 # ---------------- PAGE 3 ----------------
-if st.button("Predict PCOS Risk"):
+# ---------------- PAGE 3 ----------------
+elif menu == "Individual Risk Assessment":
+    st.title("🧍 Individual PCOS Risk Prediction")
 
-    row = dict.fromkeys(feature_cols, 0)
+    col1, col2 = st.columns(2)
 
-    # map known features by exact training names
-    def set_if_exists(name, value):
-        if name in row:
-            row[name] = value
+    with col1:
+        age = st.number_input("Age", 15, 50)
+        height = st.number_input("Height (cm)")
+        weight = st.number_input("Weight (kg)")
+        systolic = st.number_input("BP Systolic")
+        diastolic = st.number_input("BP Diastolic")
 
-    set_if_exists("Age (yrs)", age)
-    set_if_exists("Height(Cm)", height)
-    set_if_exists("Weight (Kg)", weight)
-    set_if_exists("BMI", bmi)
-    set_if_exists("BP _Systolic (mmHg)", systolic)
-    set_if_exists("BP _Diastolic (mmHg)", diastolic)
-    set_if_exists("LH", lh)
-    set_if_exists("FSH", fsh)
-    set_if_exists("FSH/LH", fsh/lh if lh != 0 else 0)
-    set_if_exists("AMH", amh)
-    set_if_exists("TSH", tsh)
-    set_if_exists("PRL", prl)
+    with col2:
+        lh = st.number_input("LH")
+        fsh = st.number_input("FSH")
+        amh = st.number_input("AMH")
+        tsh = st.number_input("TSH")
+        prl = st.number_input("Prolactin")
 
-    input_df = pd.DataFrame([row])
-    input_scaled = scaler.transform(input_df)
+    bmi = weight / ((height/100)**2) if height > 0 else 0
+    st.write(f"**Calculated BMI:** {bmi:.2f}")
 
-    prediction = model.predict(input_scaled)[0]
-    probability = model.predict_proba(input_scaled)[0][1]
+    if st.button("Predict PCOS Risk"):
 
-    st.subheader("Result")
+        # ✅ get exact training feature order
+        feature_cols = scaler.feature_names_in_
 
-    if probability > 0.65:
-        st.error(f"⚠️ High Risk of PCOS ({probability*100:.2f}%)")
-    elif probability > 0.35:
-        st.warning(f"🟠 Moderate Risk ({probability*100:.2f}%)")
-    else:
-        st.success(f"✅ Low Risk ({probability*100:.2f}%)")
+        # ✅ create zero row with correct columns
+        row = dict.fromkeys(feature_cols, 0)
+
+        # ✅ safely map inputs if column exists
+        def put(col, val):
+            if col in row:
+                row[col] = val
+
+        put("Age (yrs)", age)
+        put("Height(Cm)", height)
+        put("Weight (Kg)", weight)
+        put("BMI", bmi)
+        put("BP _Systolic (mmHg)", systolic)
+        put("BP _Diastolic (mmHg)", diastolic)
+        put("LH", lh)
+        put("FSH", fsh)
+        put("FSH/LH", fsh/lh if lh != 0 else 0)
+        put("AMH", amh)
+        put("TSH", tsh)
+        put("PRL", prl)
+
+        # build dataframe in correct order
+        input_df = pd.DataFrame([row])
+        input_df = input_df[feature_cols]
+
+        # scale + predict
+        input_scaled = scaler.transform(input_df)
+        prediction = model.predict(input_scaled)[0]
+        probability = model.predict_proba(input_scaled)[0][1]
+
+        st.subheader("Result")
+
+        if probability > 0.65:
+            st.error(f"⚠️ High Risk of PCOS ({probability*100:.2f}%)")
+        elif probability > 0.35:
+            st.warning(f"🟠 Moderate Risk ({probability*100:.2f}%)")
+        else:
+            st.success(f"✅ Low Risk of PCOS ({probability*100:.2f}%)")
+
 
 
 # ---------------- PAGE 4 ----------------
