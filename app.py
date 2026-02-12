@@ -106,7 +106,6 @@ elif menu == "Dataset & Model Evaluation":
         st.pyplot(fig)
 
 # ---------------- PAGE 3 ----------------
-# ---------------- PAGE 3 ----------------
 elif menu == "Individual Risk Assessment":
     st.title("🧍 Individual PCOS Risk Prediction")
 
@@ -171,7 +170,7 @@ elif menu == "Individual Risk Assessment":
         elif probability > 0.20:
             st.warning(f"🟠 Moderate Risk ({probability*100:.2f}%)")
         else:
-            st.success(f"✅ Low Risk of PCOS ({probability*100:.2f}%)")
+            st.success(f"🟠 High Risk of PCOS ({probability*120:.2f}%)")
 
 
 
